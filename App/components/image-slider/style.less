@@ -1,0 +1,35 @@
+.slider-list__box {
+	position:relative;
+
+	display: flex;
+	align-items: center;
+
+}
+
+.slider-list__images {
+	position: absolute;
+	left: 0;
+
+	margin: 0;
+
+	display: flex;
+
+	padding: 0;
+
+	list-style: none;
+
+	transition: left 0.5s;
+}
+
+.slider-list__image-item {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	&--active {
+		transform: scale(1.1);
+	}
+}
+.slider-list__image {
+    height: 100px;
+}
