@@ -39,4 +39,4 @@ const imagesList = [
     ];
 
 new SliderList (document.querySelector('.slider-wrapper'),
-	imagesList, 600, 100, 150, 5, false);
+	imagesList, 200, 500, 120, 5, true);

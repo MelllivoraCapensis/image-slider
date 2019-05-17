@@ -9,12 +9,16 @@ class SliderList {
         this.itemOffset = itemOffset;
         this.isVertical = isVertical;
         this.padding = 5;
+        this.touchMultiplyer = 0;
 
         this.scrollStep = 40;
         this.size = {
         	width: width,
         	height: height
         };
+
+        this.sliderLen = this.isVertical ? 
+            this.size.height : this.size.width;
 
         this.state = {
         	selectedNum: 0,
@@ -30,20 +34,20 @@ class SliderList {
 			this.imageItems.length -1);
 		this.state.selectedNum = correctValue;
 		this.renderSelectedItem();
-
-		this.scroll = this.state.selectedNum
-		    * (this.imageWidth + this.itemOffset)
-		    - (this.size.width - this.imageWidth) / 2;
+        
+      	this.scroll = this.state.selectedNum
+		    * (this.imageSize + this.itemOffset)
+		    - (this.sliderLen - this.imageSize) / 2;
 	}
 
-	set leftScroll (value) {
+	set scroll (value) {
 		const maxValue = Math.max(0, this.imageItems.length
-		    * (this.imageWidth + this.itemOffset)
-		    - this.size.width);
+		    * (this.imageSize + this.itemOffset)
+		    - this.sliderLen);
 	    let correctValue = Math.min(maxValue, value);
 	    correctValue = Math.max(0, correctValue);
-	    this.state.leftScroll = correctValue;
-	    this.renderLeftScroll();
+	    this.state.scroll = correctValue;
+	    this.renderScroll();
 	}
 
 	init () {
@@ -104,36 +108,31 @@ class SliderList {
 				this.size.height);
 			image.width = (this.isVertical ? this.size.width :
 				this.imageSize);
+			image.dataset.num = ind;
 		
 			image.src = imageData.src;
 		})
 	}
 
 	addHadlers () {
-		this.addClickHandler();
         this.addKeyHandler();
         this.addScrollHandler();
-	}
-
-	addClickHandler () {
-		this.imageItems.forEach((imageItem, ind) => {
-
-            imageItem.querySelector('.slider-list__image')
-                .onclick = () => {
-                    this.selectedNum = ind;
-                } 
-		})
+        this.addSwipeHandler();
 	}
 
 	addKeyHandler () {
 		this.box.onkeydown = (e) => {
-			if(e.key == 'ArrowRight')
+			const keyNext = this.isVertical ? 'ArrowDown'
+			    : 'ArrowRight';
+			const keyPrev = this.isVertical ? 'ArrowUp'
+			    : 'ArrowLeft';
+			if(e.key == keyNext)
 			{
-				this.selectedNum = this.state.selectedNum + 1;
+				this.shiftSelected(1);
 			}
-			if(e.key == 'ArrowLeft')
+			if(e.key == keyPrev)
 			{
-				this.selectedNum = this.state.selectedNum - 1;
+				this.shiftSelected(-1);
 			}
 		}
 		this.imageItems.forEach((imageItem, ind) => {
@@ -144,13 +143,82 @@ class SliderList {
 		})
 	}
 
+	shiftSelected (shiftNum) {
+        this.selectedNum = this.state.selectedNum + shiftNum;
+	}
+    
+    scrollTo (shiftValue) {
+    	this.scroll = this.state.scroll + shiftValue;
+    }
+
+
 	addScrollHandler () {
 		this.box.onmousewheel = (e) => {
 			e.preventDefault();
-			this.leftScroll = this.state.leftScroll 
-			+ Math.sign(e.deltaY) * this.scrollStep;
-			
+			this.scroll = this.state.scroll 
+			+ Math.sign(e.deltaY) * this.scrollStep
+			this.imageSize / 2;
 		}
+	}
+
+	addSwipeHandler () {
+
+		this.imagesList.ondragstart = () => {
+			return false;
+		}
+
+		this.imagesList.onmousedown = (e) => {
+          
+            const startTouch = {
+            	left: e.clientX,
+            	top: e.clientY
+            };
+
+            const startScroll = this.state.scroll;
+
+            this.imagesList.onmousemove = (e) => {
+                
+                const touch = {
+                	left: e.clientX,
+                	top: e.clientY
+                };
+
+                const shift = this.isVertical ? 
+                     touch.top - startTouch.top
+                   : touch.left - startTouch.left;
+
+                this.scroll = startScroll - shift;
+
+            }
+
+            this.imagesList.onmouseup = (e) => {
+               
+                this.imagesList.onmousemove = null;
+
+            	const endTouch = {
+            		left: e.clientX,
+                	top: e.clientY
+            	}
+
+                const shift = this.isVertical ? 
+                    endTouch.top - startTouch.top
+                    : endTouch.left - startTouch.left;
+
+               	if(shift == 0)
+               	{
+            		if(e.target.tagName == 'IMG')
+            		    this.selectedNum = e.target.dataset.num;
+               	}
+            	// else 
+            	// {
+            		
+            	// 	this.scrollTo( - shift * this.touchMultiplyer);
+            	// }
+
+            }
+
+		}
+            
 	}
 
 	renderSelectedItem () {
@@ -163,8 +231,11 @@ class SliderList {
 		    .classList.add(activeClass);
 	}
 
-	renderLeftScroll () {
-        this.imagesList.style.left = - this.state.leftScroll + 'px';
+	renderScroll () {
+		if(this.isVertical)
+			this.imagesList.style.top = - this.state.scroll + 'px';
+		else
+			this.imagesList.style.left = - this.state.scroll + 'px';
 	}
 
 	appendDom (tag, parent, elemClasses, innerText) {
