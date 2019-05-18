@@ -10,15 +10,12 @@ class SliderList {
         this.isVertical = isVertical;
         this.padding = 5;
         this.touchMultiplyer = 0;
-
+      
         this.scrollStep = 40;
         this.size = {
         	width: width,
         	height: height
         };
-
-        this.sliderLen = this.isVertical ? 
-            this.size.height : this.size.width;
 
         this.state = {
         	selectedNum: 0,
@@ -48,15 +45,34 @@ class SliderList {
 	    correctValue = Math.max(0, correctValue);
 	    this.state.scroll = correctValue;
 	    this.renderScroll();
+	    this.renderProgress();
+	}
+
+	get progress () {
+		return this.state.scroll / 
+		    this.maxScroll;
 	}
 
 	init () {
 		this.build();
+
+		this.sliderLen = this.isVertical ? 
+            this.size.height : this.size.width;
+
+		this.maxScroll = Math.max(0, this.imageItems.length 
+		    * (this.imageSize + this.itemOffset)
+		    	- this.sliderLen);
+	
 		this.addHadlers();
 	}
 
 	build () {
-		this.box = this.appendDom('div', this.wrapper,
+		this.subwrapper = this.appendDom('div', this.wrapper,
+			['slider-list__subwrapper'], false);
+		this.subwrapper.classList.add('slider-list__subwrapper' 
+		    + (this.isVertical ? '--vertical' : '--horizontal'));
+
+		this.box = this.appendDom('div', this.subwrapper,
 			['slider-list__box'], false);
 		this.box.style.height = this.size.height + 
 		    (!this.isVertical ? this.padding * 2 : 0) + 'px';
@@ -65,21 +81,34 @@ class SliderList {
 		this.box.tabIndex = 0;
 		this.box.style.overflow = 'hidden';
         
+        this.progressBar = this.appendDom('div', this.subwrapper,
+        	['slider-list__progress-bar'], false);
+        this.progressBar.classList.add('slider-list__progress-bar'
+        	+ (this.isVertical ? '--vertical' : '--horizontal'));
+        this.progressLine = this.appendDom('div', this.progressBar,
+        	['slider-list__progress-line'], false);
+        this.progressLine.classList.add('slider-list__progress-line'
+        	+ (this.isVertical ? '--vertical' : '--horizontal'));
+
+
         this.imagesList = this.appendDom('ul', this.box,
 			['slider-list__images'], false);
+
+        // this.imagesList.classList.add('slider-list__images'
+        // 	+ (this.isVertical ? '--vertical' : '--horizontal'));
 
        	this.imagesList.style.flexDirection = 
        	    (this.isVertical ? 'column' : 'row');
 
         if(this.isVertical)
         {
-        	this.imagesList.style.paddingLeft = '5px';
-        	this.imagesList.style.paddingRight = '5px';
+        	this.imagesList.style.paddingLeft = this.padding + 'px';
+        	this.imagesList.style.paddingRight = this.padding + 'px';
         }
         else
         {
-        	this.imagesList.style.paddingTop = '5px';
-        	this.imagesList.style.paddingBottom = '5px';
+        	this.imagesList.style.paddingTop = this.padding + 'px';
+        	this.imagesList.style.paddingBottom = this.padding + 'px';
         }
       
 		this.imagesData.forEach((imageData, ind) => {
@@ -118,6 +147,7 @@ class SliderList {
         this.addKeyHandler();
         this.addScrollHandler();
         this.addSwipeHandler();
+        this.addProgressClickHandler();
 	}
 
 	addKeyHandler () {
@@ -153,7 +183,7 @@ class SliderList {
 
 
 	addScrollHandler () {
-		this.box.onmousewheel = (e) => {
+		this.box.onwheel = (e) => {
 			e.preventDefault();
 			this.scroll = this.state.scroll 
 			+ Math.sign(e.deltaY) * this.scrollStep
@@ -209,16 +239,35 @@ class SliderList {
             		if(e.target.tagName == 'IMG')
             		    this.selectedNum = e.target.dataset.num;
                	}
-            	// else 
-            	// {
-            		
-            	// 	this.scrollTo( - shift * this.touchMultiplyer);
-            	// }
+          
+            }
 
+            this.imagesList.onmouseleave = (e) => {
+            	this.imagesList.onmousemove = null;
             }
 
 		}
             
+	}
+
+	addProgressClickHandler () {
+		this.progressBar.onclick = (e) => {
+			if(this.isVertical)
+			{
+				this.scroll = (e.clientY + pageYOffset - 
+				this.getCoords(this.progressBar).top)
+		    	/ this.size.height * this.maxScroll;
+			}
+				
+			else
+			{
+				this.scroll = (e.clientX + pageXOffset - 
+				this.getCoords(this.progressBar).left)
+	     		/ this.size.width * this.maxScroll;
+			}
+					
+		}
+
 	}
 
 	renderSelectedItem () {
@@ -238,6 +287,12 @@ class SliderList {
 			this.imagesList.style.left = - this.state.scroll + 'px';
 	}
 
+	renderProgress () {
+		this.progressLine.style[(this.isVertical ?
+			'height' : 'width')] = this.progress * 100 + '%';
+
+	}
+
 	appendDom (tag, parent, elemClasses, innerText) {
         const elem = document.createElement(tag);
         elemClasses.forEach((elemClass) => {
@@ -247,6 +302,14 @@ class SliderList {
         if(innerText)
         	elem.textContent = innerText;
         return elem;
+	}
+
+	getCoords(elem) {
+        let box = elem.getBoundingClientRect();
+        return {
+	        top: box.top + pageYOffset,
+		    left: box.left + pageXOffset
+		};
 	}
 }
 
