@@ -36,7 +36,6 @@ class SliderList {
       	this.scroll = this.state.selectedNum
 		    * (this.imageSize + this.itemOffset)
 		    - (this.sliderLen - this.imageSize) / 2;
-
 		this.parent.setSelectedNum(
 			this.state.selectedNum);
 	}
