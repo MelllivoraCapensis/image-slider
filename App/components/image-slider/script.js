@@ -1,14 +1,15 @@
 class SliderList {
-	constructor (wrapper, imagesData, width, height, 
+	constructor (parent, wrapper, imagesData, width, height, 
 		    imageSize, itemOffset, isVertical) {
-
+        
+        this.parent = parent;
         this.imagesData = imagesData;
         this.wrapper = wrapper;
         this.imageItems = [];
         this.imageSize= imageSize;
         this.itemOffset = itemOffset;
         this.isVertical = isVertical;
-        this.padding = 5;
+        this.padding = 15;
         this.touchMultiplyer = 0;
       
         this.scrollStep = 40;
@@ -18,8 +19,8 @@ class SliderList {
         };
 
         this.state = {
-        	selectedNum: 0,
-        	scroll: 0
+        	selectedNum: null,
+        	scroll: null
         }
 
         this.init();
@@ -35,6 +36,9 @@ class SliderList {
       	this.scroll = this.state.selectedNum
 		    * (this.imageSize + this.itemOffset)
 		    - (this.sliderLen - this.imageSize) / 2;
+
+		this.parent.setSelectedNum(
+			this.state.selectedNum);
 	}
 
 	set scroll (value) {
@@ -158,10 +162,12 @@ class SliderList {
 			    : 'ArrowLeft';
 			if(e.key == keyNext)
 			{
+				e.preventDefault();
 				this.shiftSelected(1);
 			}
 			if(e.key == keyPrev)
 			{
+				e.preventDefault();
 				this.shiftSelected(-1);
 			}
 		}
@@ -311,23 +317,68 @@ class SliderList {
 		    left: box.left + pageXOffset
 		};
 	}
+
+	setSelectedNum (value) {
+		if(this.state.selectedNum == value)
+			return;
+		this.selectedNum = value;
+	}
 }
 
 class SliderSelected {
-	constructor () {
+	constructor (parent, wrapper, imagesList, width, height) {
+		this.parent = parent;
+        this.wrapper = wrapper;
+        this.imagesList = imagesList;
+        this.width = width;
+        this.height = height;
 
+        this.state = {
+        	selectedNum: null
+        };
+
+        this.init();
 	}
-}
 
+	set selectedNum (value) {
+		let correctValue = Math.max(value, 0);
+		correctValue = Math.min(correctValue, 
+			this.imagesList.length -1);
+		this.state.selectedNum = correctValue;
+		this.render();
+   	}
 
-class ImageSlider {
-	constructor (wrapper, imagesList) {
-        
+	init () {
+		this.build();
 	}
 
+	build () {
+		this.box = this.appendDom('div', this.wrapper, 
+			['slider-selected__box'], false);
+		this.box.style.width = this.width + 'px';
+		this.box.style.height = this.height + 'px';
 
+		this.imageWrapper = this.appendDom('div', this.box,
+			['slider-selected__image-wrapper'], false);
+		this.image = this.appendDom('img', this.imageWrapper,
+			['slider-selected__image'], false);
 
-    appendDom (tag, parent, elemClasses, innerText) {
+		this.nextButton = this.appendDom('button', this.imageWrapper,
+			['slider-selected__button', 
+			'slider-selected__button--next'], false);
+		this.prevButton = this.appendDom('button', this.imageWrapper,
+			['slider-selected__button', 
+			'slider-selected__button--prev'], false);
+	}
+
+	render () {
+        this.image.src = this.imagesList[
+            this.state.selectedNum].src;
+        this.image.style.opacity = 0;
+        this.image.style.opacity = 1;
+ 	}
+
+	appendDom (tag, parent, elemClasses, innerText) {
         const elem = document.createElement(tag);
         elemClasses.forEach((elemClass) => {
         	elem.classList.add(elemClass);
@@ -336,6 +387,112 @@ class ImageSlider {
         if(innerText)
         	elem.textContent = innerText;
         return elem;
+	}
+
+	setSelectedNum (value) {
+		if(this.state.selectedNum == value)
+			return;
+
+		this.selectedNum = value;
+	}
+
+}
+
+
+class ImageSlider {
+	constructor (wrapper, imagesList, width, height,
+		    listPosition, listMinSize,
+		    listImageSize, listImageOffset) {
+		this.wrapper = wrapper;
+		this.imagesList = imagesList;
+		this.width = width;
+		this.height = height;
+		this.listPosition = listPosition;
+		this.listMinSize = listMinSize;
+		this.listImageSize = listImageSize;
+		this.listImageOffset = listImageOffset;
+
+		this.state = {
+			selectedNum: null
+		}
+
+		this.init();
+        
+	}
+
+	set selectedNum (value) {
+		let correctValue = Math.max(value, 0);
+		correctValue = Math.min(correctValue, 
+			this.imagesList.length -1);
+		this.state.selectedNum = correctValue;
+
+		this.selected.setSelectedNum(this.state.selectedNum);
+		this.list.setSelectedNum(this.state.selectedNum);
+		this.selected.setSelectedNum(this.state.selectedNum);
+   	}
+
+	init () {
+		this.build();
+		this.setSelectedNum(0);
+	}
+
+	build () {
+		this.box = this.appendDom('div', this.wrapper,
+			['slider'], false);
+
+	   	this.listWrapper = this.appendDom('div', this.box, 
+	        ['slider-list-wrapper'], false);
+		this.selectedWrapper = this.appendDom('div', this.box,
+		    ['slider-selected-wrapper'], false);
+
+        if(this.listPosition == 'right' ||
+        	this.listPosition == 'bottom')
+	        {
+	        	this.listWrapper.style.order = 1;
+	        }
+
+	    if(this.listPosition == 'top' ||
+	    	this.listPosition == 'bottom')
+		    {
+		    	this.box.classList.add('slider--vertical');
+		    }
+		else if(this.listPosition == 'right' ||
+			this.listPosition == 'left')
+		    {
+		    	this.box.classList.add('slider--horizontal');
+		    }
+        	
+        const isListVertical = (this.listPosition == 'left'
+        	|| this.listPosition == 'right');
+        const listWidth = isListVertical ? this.listMinSize
+            : this.width;
+        const listHeight = isListVertical ? this.height
+            : this.listMinSize;
+
+		this.list = new SliderList (this, this.listWrapper,
+			this.imagesList, listWidth, listHeight, 
+			this.listImageSize, this.listImageOffset, isListVertical);
+
+		this.selected = new SliderSelected (this, this.selectedWrapper,
+			this.imagesList, this.width, this.height);
+	}
+
+	appendDom (tag, parent, elemClasses, innerText) {
+        const elem = document.createElement(tag);
+        elemClasses.forEach((elemClass) => {
+        	elem.classList.add(elemClass);
+        })
+        parent.appendChild(elem);
+        if(innerText)
+        	elem.textContent = innerText;
+        return elem;
+	}
+
+	setSelectedNum (value) {
+		if(this.state.selectedNum == value)
+			return;
+
+		this.selectedNum = value;
 	}
 
 }

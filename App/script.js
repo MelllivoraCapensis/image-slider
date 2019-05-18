@@ -38,5 +38,5 @@ const imagesList = [
 	    }
     ];
 
-new SliderList (document.querySelector('.slider-wrapper'),
-	imagesList, 200, 600, 120, 5, true);
+new ImageSlider(document.querySelector('.slider-wrapper'),
+	imagesList, 600, 400, 'bottom', 100, 150, 10);
