@@ -7,20 +7,25 @@ class ImageLoader  {
         	height: 50
         };
         this.state = {
-        	images: []
+        	imagesList: []
         }
 
         this.init();
 	}
 
 	set newImage (image) {
-		this.state.images.push(image);
+		this.state.imagesList.push(image);
 		this.renderImages();
 	}
 
 	set delImageNum (value) {
-		this.state.images.splice(value, 1);
+		this.state.imagesList.splice(value, 1);
 		this.renderImages();
+	}
+
+	set imagesList (list) {
+		this.state.imagesList = list; 
+        this.renderImages();
 	}
 
 	init () {
@@ -38,12 +43,16 @@ class ImageLoader  {
 		this.input.type = 'file';
         this.input.multiple = 'multiple';
 
+        this.clearButton = this.appendDom('button', this.box,
+        	['loader__clear-button'], 'Очистить');
+
 		this.list = this.appendDom('ul', this.box,
 			['loader__list'], false);
 	}
 
 	addHandlers () {
 		this.addInputHandler();
+		this.addClearHandler();
 	}
 
 	addInputHandler () {
@@ -56,7 +65,7 @@ class ImageLoader  {
 
 				if(file.type != 'image/png' &&
 					file.type != 'image/jpeg')
-					return;
+					continue;
 
 
 				const fileReader = new FileReader();
@@ -73,9 +82,15 @@ class ImageLoader  {
 	    }
 	}
 
+	addClearHandler () {
+		this.clearButton.onclick = () => {
+			this.imagesList = [];
+		}
+	}
+
 	renderImages () {
 		this.list.innerHTML = '';
-		this.state.images.forEach((image, ind) => {
+		this.state.imagesList.forEach((image, ind) => {
 			const imageLi = this.appendDom('li', this.list,
 				['loader__image-item'], false);
 
@@ -111,7 +126,7 @@ class ImageLoader  {
 	}
 
 	getImages () {
-		return this.state.images;
+		return this.state.imagesList;
 	}
 
 

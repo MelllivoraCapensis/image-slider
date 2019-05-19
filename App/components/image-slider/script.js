@@ -451,8 +451,22 @@ class SliderSelected {
 	render () {
         this.image.src = this.imagesList[
             this.state.selectedNum].src;
-        this.image.style.opacity = 0;
-        this.image.style.opacity = 1;
+        this.image.onload = () => {
+        	const imageRelation = 
+        	    this.image.naturalWidth / this.image.naturalHeight;
+        	const boxRelation = this.width / this.height;
+
+        	if(imageRelation >= boxRelation)
+        	{
+        		this.image.width = this.width;
+        		this.image.height = this.image.width / imageRelation;
+        	}
+        	else
+        	{
+        		this.image.height = this.height;
+        		this.image.width = this.height * imageRelation;
+        	}
+        }
  	}
 
 	appendDom (tag, parent, elemClasses, innerText) {
