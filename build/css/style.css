@@ -6,6 +6,7 @@
 .subwrapper {
   display: flex;
   justify-content: space-around;
+  align-items: start;
 }
 .box__slider-wrapper {
   display: inline-flex;
