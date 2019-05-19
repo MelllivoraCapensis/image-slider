@@ -508,7 +508,7 @@ class ImageSlider {
 		this.selected.setSelectedNum(this.state.selectedNum);
    	}
 
-	init () {
+    init () {
 		this.build();
 		this.setSelectedNum(0);
 	}
