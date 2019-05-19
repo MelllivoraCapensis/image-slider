@@ -330,16 +330,16 @@ class App {
     
     addDataButtonsHandlers () {
     	this.dataSelectorDefault.onclick = () => {
-    		this.imagesList = this.defaultImagesList;
     		this.state.imagesDefault = true;
-    	}  
+    		this.imagesList = this.defaultImagesList;
+       	}  
     	this.dataSelectorCustom.onclick = () => {
     		const customImagesList = this.loader.getImages();
     		if(customImagesList.length == 0)
     			return;
-    		this.imagesList = this.loader.getImages();
     		this.state.imagesDefault = false;
-    	}      
+    		this.imagesList = this.loader.getImages();
+     	}      
     }
 
     render () {
@@ -356,7 +356,18 @@ class App {
     	this.imageOffsetSelectorInput.value = this.state.settings.imageOffset;
     	this.listMinSizeSelectorInput.value = this.state.settings.listMinSize;
     	this.listPositionSelectorInput.selected = this.state.settings.listPosition;
-
+        
+        const activeClass = 'box__data-selector-button--active';
+        if(this.state.imagesDefault)
+            {
+            	this.dataSelectorDefault.classList.add(activeClass);
+            	this.dataSelectorCustom.classList.remove(activeClass);
+            }
+        else
+        	{
+            	this.dataSelectorDefault.classList.remove(activeClass);
+            	this.dataSelectorCustom.classList.add(activeClass);
+            }
     }
 
 	appendDom (tag, parent, elemClasses, innerText) {

@@ -36,7 +36,11 @@
 }
 .box__data-selector-button {
   padding: 2px 20px;
-  background: ;
+  background: #ABB1BA;
+}
+.box__data-selector-button--active {
+  background: black;
+  color: white;
 }
 .box__position-selector {
   display: flex;
