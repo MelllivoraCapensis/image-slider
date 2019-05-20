@@ -224,8 +224,8 @@ class App {
 	}
     
     set sliderListPosition (value) {
-		this.state.settings.listPosition = value;
-		this.render();
+    	this.state.settings.listPosition = value;
+    	this.render();
 	}
 
 	init () {
