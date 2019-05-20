@@ -264,7 +264,7 @@ class App {
 	        	this[featureName + 'Selector'], ['box__feature-label'], 
 	        	label);
 	        this[featureName + 'SelectorInput'] = this.appendDom('input', 
-	        	this[featureName + 'Selector'], ['box__feature-input'], false);
+	        	this[featureName + 'SelectorLabel'], ['box__feature-input'], false);
         })
 
         this.listPositionSelector = this.appendDom('div', this.box,
@@ -382,7 +382,7 @@ class App {
 	}
 }
 
-new App(document.querySelector('.container'));
+new App(document.querySelector('.wrapper'));
 
 
 

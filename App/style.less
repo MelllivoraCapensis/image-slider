@@ -1,24 +1,27 @@
-.wrapper {
-	
+body,
+body input,
+body button,
+body select {
+	font-family: "Comic Sans MS", "Arial Black";
 }
 
-.box {
-	height: 100px;
-	margin-bottom: 20px;
-
-	border: 2px solid black;
+.wrapper {
+	display: flex;
+	flex-direction: column;
 }
 
 .subwrapper {
 	display: flex;
 	justify-content: space-around;
 	align-items: start;
+	
+	box-sizing: border-box;
 }
 
 .box__slider-wrapper {
 	display: inline-flex;
-
 	justify-content: center;
+	margin-right: 20px;
 }
 
 .box__loader-wrapper {
@@ -30,8 +33,12 @@
 	display: flex;
 	justify-content: flex-start;
 	min-width: 800px;
+	height: 100px;
+	margin-bottom: 20px;
 
 	padding: 10px;
+
+	background: #D7D7DB;
 }
 
 .box__data-selector {
@@ -83,5 +90,16 @@
 	&-input {
 		margin-left: 5px;
 		width: 70px;
+
+		text-align: center;
+	}
+
+	&-label {
+		border-bottom: 1px dashed gray;
+
+		&:hover {
+			color: red;
+			cursor: pointer;
+		}
 	}
 }
